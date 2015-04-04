@@ -10,11 +10,84 @@
   <body>
 
     <script>
-    var height = 600
-    var width = 600
+    /* Implement a bar chart to compare the number of senior IE students in the five universities. The bar chart should have a proper title, axes, axis labels, and legends. (30 points)*/
 
-    var canvas
-    
+    /*declare global variables*/
+
+    var margin= {top:20, right: 20, left: 20, bottom: 150};
+    var height = 600-margin.top - margin.bottom;
+    var width = 600 - margin.right-margin.left;
+
+    /*declares scale and axis */
+
+    var xScale = d3.scale.ordinal()
+        .rangeRoundBands([0, width]);
+
+    var yScale = d3.scale.linear()
+        .range([height,0]);
+
+    var xAxis = d3.svg.axis()
+        .scale(xScale)
+        .orient("bottom");
+
+    var yAxis = d3.svg.axis()
+        .scale(yScale)
+        .orient("left");
+    /* creates canvas */
+
+    var canvas = d3.select("body").append("svg")
+        .attr("width", width)
+        .attr("height", height);
+
+
+    /*Get Data and call */
+    d3.json("https://hivelab.org/static/exam1.json", function(error, data){
+      console.log("Got Data");
+      console.log(data[3]);
+      var Uni = Object.keys(data[3]).filter(
+        function(d){
+            return (d != "Year");
+          }
+        ).map(
+            function(d) {
+              return{
+                "name" : d
+              }
+            }
+        );
+        x.domain()
+        console.log(Uni);
+/*      var uniName = {};
+      uniName = Object.keys(data[3].filter(function(d){
+            return (d!="Senior");}));
+        console.log(uniName);
+
+      console.log(uniName);
+      console.log(data[0]);*/
+
+      canvas.selectAll("rect")
+        .data(data[0])
+        .enter()
+          .append("rect")
+          .attr("width", function(d){ return width/data.length-1})
+          .attr("height", function(d) {return d})
+          .attr("fill", "blue")
+          .attr("stroke", "white");
+
+
+      /*Axes*/
+      /*Axis Labels*/
+      /*Title*/
+      /*Legend*/
+
+
+
+
+    });
+  /*References: http://bl.ocks.org/mbostock/3885304
+
+  */
+
     </script>
 
   </body>
