@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <title>Nesting</title>
+    <script type="text/javascript" src="d3/d3.js"></script>
+  </head>
+  <body>
+    <script type="text/javascript">
+
+    d3.csv("https://hivelab.org/static/coffee.csv", function(d){
+      console.log("got data");
+      var nested_data = d3.nest()
+        .key(function(d){ return d.region;      })
+        .key(function(d){ return d.state;       })
+        .key(function(d){ return d.caffeination;})
+        .key(function(d){ return d.category;    })
+        .rollup(function(leaves){
+          return {"totSales":d3.sum(leaves,function(d){
+            return parseInt(d.sales);    })
+                                                }}
+        )
+        .entries(d);
+
+      console.log(nested_data[0]);
+    })
+
+    </script>
+  </body>
+</html>
