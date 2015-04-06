@@ -17,6 +17,7 @@
     var margin= {top:20, right: 20, left: 20, bottom: 150};
     var height = 600-margin.top - margin.bottom;
     var width = 600 - margin.right-margin.left;
+    var sr;
 
     /*declares scale and axis */
 
@@ -36,41 +37,40 @@
     /* creates canvas */
 
     var canvas = d3.select("body").append("svg")
-        .attr("width", width)
-        .attr("height", height);
+        .attr("width", width +margin.left + margin.right)
+        .attr("height", height + margin.top + margin.right)
+      .append("g")
+        .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
 
 
     /*Get Data and call */
     d3.json("https://hivelab.org/static/exam1.json", function(error, data){
       console.log("Got Data");
       console.log(data[3]);
-      var Uni = Object.keys(data[3]).filter(
-        function(d){
-            return (d != "Year");
-          }
-        ).map(
-            function(d) {
-              return{
-                "name" : d
-              }
-            }
-        );
-        x.domain()
-        console.log(Uni);
-/*      var uniName = {};
-      uniName = Object.keys(data[3].filter(function(d){
-            return (d!="Senior");}));
-        console.log(uniName);
+      senior = data[3];
+      console.log(senior);
 
-      console.log(uniName);
-      console.log(data[0]);*/
+      senior = d3.entries(senior).filter(function(key){return key != "Year";});
+      var goodbye = senior.shift();
+      console.log(senior);
+
+      xScale.domain(function(senior){return senior.key;});
+
+
+
+  /*    yScale.domain(0,d3.max(function(senior){return senior.value;}));*/
+
+      canvas.append("g")
+        .attr("class", "x axis")
+        .attr("transform", "translate (0," + height + ")")
+        .call (xAxis);
 
       canvas.selectAll("rect")
-        .data(data[0])
+        .data(senior)
         .enter()
           .append("rect")
-          .attr("width", function(d){ return width/data.length-1})
-          .attr("height", function(d) {return d})
+          .attr("width", function(d){ return 5})
+          .attr("height", function(d) {return d.value})
           .attr("fill", "blue")
           .attr("stroke", "white");
 
@@ -87,7 +87,17 @@
   /*References: http://bl.ocks.org/mbostock/3885304
 
   */
-
+  /*    var Uni = Object.keys(senior).filter(
+        function(d){
+            return (d != "Year");
+          }
+        ).map(
+            function(d) {
+              return{
+                "name" : d
+              }
+            }
+        );*/
     </script>
 
   </body>
