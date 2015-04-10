@@ -10,7 +10,7 @@
 
           var w = 600;
           var h = 600;
-          var color = d3.scale.category20();
+          var color = d3.scale.category20b();
           var root;
 
           var canvas = d3.select("body").append("svg")
@@ -22,7 +22,7 @@
             .sticky(true)
             .children(function(d){ return d.values; })
             .value(function(d) {return +d.sales;})
-            .padding(1);
+            .padding(4);
 
       d3.csv("https://hivelab.org/static/coffee.csv", function(error, data){
           root = d3.nest()
@@ -50,15 +50,28 @@
               cell.append("rect")
                   .attr("width", function(d) { return d.dx; })
                   .attr("height", function(d) { return d.dy; })
-                  .style("fill", function(d) { return color(d.values)})
-                /*  .style("fill", "steelblue")*/;
+                  .attr("fill", function(d) { if (d.caffeination === "Regular"){
+                                        return "#8c510a"}
+                                        else{
+                                          return "green"
+                                        }
+                  })
+                  .attr("stroke", function(d) { if (d.caffeination === "Regular"){
+                                        return "#8c510a"}
+                                        else{
+                                          return "green"
+                                        }
+                  });
 
               cell.append("text")
                   .attr("x", function(d) { return d.dx / 2; })
                   .attr("y", function(d) { return d.dy / 2; })
                   .attr("dy", ".35em")
                   .attr("text-anchor", "middle")
-                  .text(function(d) { return d.children ? null : d.values; });;
+                /*  .text(function(d) { return d.children ? null : d.parent.key; })*/;
+
+
+
             });
 
       </script>
