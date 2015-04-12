@@ -4,6 +4,20 @@
     <meta charset="utf-8">
     <title>Coffee2</title>
     <script type="text/javascript" src="d3/d3.js"></script>
+    <style>
+      .West{
+        stroke: black;
+      }
+      .East{
+        stroke: red;
+      }
+      .Central{
+        stroke: blue;
+      }
+      .South{
+        stroke: yellow;
+      }
+      </style>
   </head>
   <body>
     <script type="text/javascript">
@@ -22,58 +36,84 @@
             .sticky(true)
             .children(function(d){ return d.values; })
             .value(function(d) {return +d.sales;})
-            .padding(4);
+            .padding(.5);
+
+          function notTooSmall (d){
+              return d.depth ==1||d.depth==2
+          };
 
       d3.csv("https://hivelab.org/static/coffee.csv", function(error, data){
+
+
           root = d3.nest()
             .key(function(){return "rootNode";})
-            .key(function(d){ return d.caffeination;})
             .key(function(d){ return d.region;      })
-          /*  .key(function(d){ return d.state;       })*/
-          /*  .rollup(function(leaves){
-              return {"totSales":d3.sum(leaves,function(d){
-                return parseFloat(d.sales)
-                })};
-              })*/
+            .key(function(d){ return d.category;       })
+            .key(function(d){ return d.caffeination;})
             .entries(data);
 
           console.log(root);
 
+              var treeDataSet = treemap.nodes(root[0]).filter(function(d){return d.depth===1||d.depth === 2|| d.depth===3});
 
               var cell = canvas.data(root)
                   .selectAll("g")
-                  .data(treemap.nodes)
-                .enter().append("g")
+                  .data(treeDataSet)
+                  .enter()
+                  .append("g")
                   .attr("class", "cell")
+                  .attr("class", function(d){return d.caffeination})
+                  .attr("class", function(d){return d.region})
+                  .attr("class", function(d){return d.category})
                   .attr("transform", function(d) { return "translate(" + d.x + "," + d.y + ")"; });
+
+              console.log(treeDataSet);
 
               cell.append("rect")
                   .attr("width", function(d) { return d.dx; })
                   .attr("height", function(d) { return d.dy; })
-                  .attr("fill", function(d) { if (d.caffeination === "Regular"){
-                                        return "#8c510a"}
+                  .attr("fill", function(d) { if (d.key == "Regular"){
+                                        return "#d8b365"}
                                         else{
-                                          return "green"
+                                          return "#a1d76a"
                                         }
                   })
-                  .attr("stroke", function(d) { if (d.caffeination === "Regular"){
-                                        return "#8c510a"}
-                                        else{
-                                          return "green"
-                                        }
-                  });
+                  .attr("stroke", "white");
 
-              cell.append("text")
+
+                cell.append("text")
                   .attr("x", function(d) { return d.dx / 2; })
                   .attr("y", function(d) { return d.dy / 2; })
                   .attr("dy", ".35em")
                   .attr("text-anchor", "middle")
-                /*  .text(function(d) { return d.children ? null : d.parent.key; })*/;
+                  .text(function(d) {if (d.depth <3||d.depth>0){return d.parent.key;}})//*return d.children ? null : d.parent.key; })
+                  ;
+
+                cell.append("title")
+                  .text(function(d){return d.key +" "+ d.parent.key +" annual sales, in dollars "+" $"+ d.value+".00"});
 
 
 
             });
 
       </script>
+      <div class = "discussion">
+          <h3> Interactive Treemap of Annual Beverage Sales</h3>
+          <p> Hover over a cell to see the sales per year by caffeination and category, grouped by region (hidden)</p>
+          <p> Looking at the cells, we can see that decaffeinated drink sales are only slightly less than regular sales</p>
+          <p>
+          <p> Author: Katie Ernst</p>
+          <p> Data from <a href="https://hivelab.org/static/coffee.csv">https://hivelab.org/static/coffee.csv</a></p>
+          <p> Visualized with <a href = "http://d3js.org/">D3</a></p>
+      </div>
+      <!--The author gratefully acknowledges the labor of others posted at the following:
+      http://colorbrewer2.org/
+      http://bl.ocks.org/mbostock/972398
+
+
+
+
+
+        -->
     </body>
   </html>
