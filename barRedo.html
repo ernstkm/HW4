@@ -4,7 +4,24 @@
   <meta charset="utf-8">
   <title>Bar Redo</title>
   <script type="text/javascript" src="d3/d3.js"></script>
-  <style>
+  <style type="text/css">
+  body{
+    background-color:white;
+  }
+
+  h2,h3, p, h4, h5{
+    font-family:Helvetica;
+    color:darkgrey;
+    }
+  p{
+    font-size:10px;
+  }
+  .axis path, .axis line{
+    fill: none;
+    stroke:darkgrey;
+    shape-rendering:crispEdges;
+  }
+
   </style>
 </head>
   <body>
@@ -14,15 +31,17 @@
 
     /*declare global variables*/
 
-    var margin= {top:20, right: 20, left: 20, bottom: 150};
+    var margin= {top:20, right: 20, left: 50, bottom: 40};
     var height = 600-margin.top - margin.bottom;
     var width = 600 - margin.right-margin.left;
-    var sr;
+    var seniorTotals;
+
 
     /*declares scale and axis */
+    var color = d3.scale.category10();
 
     var xScale = d3.scale.ordinal()
-        .rangeRoundBands([0, width]);
+        .rangeRoundBands([0, width], .1);
 
     var yScale = d3.scale.linear()
         .range([height,0]);
@@ -45,34 +64,68 @@
 
     /*Get Data and call */
     d3.json("https://hivelab.org/static/exam1.json", function(error, data){
-      console.log("Got Data");
-      console.log(data[3]);
-      senior = data[3];
+
+      d3.select("body").append("h3").text("Number of IE Senior Undergraduates at 5 Universities");
+      d3.select("body").append("h5").text("Author: Katie Ernst");
+      d3.select("body").append("h5").text("Data from https://hivelab.org/static/exam1.json");
+
+
+      seniorTotals = d3.entries(data[3]).filter(function(d){return d.keys!= "Senior";});
+      var bye = seniorTotals.shift();
+      var senior = seniorTotals.map(function(d){
+          return{
+              "name": d.key, "pop":d.value};
+            });
+
       console.log(senior);
 
-      senior = d3.entries(senior).filter(function(key){return key != "Year";});
-      var goodbye = senior.shift();
-      console.log(senior);
-
-      xScale.domain(function(senior){return senior.key;});
-
-
-
-  /*    yScale.domain(0,d3.max(function(senior){return senior.value;}));*/
+      xScale.domain(senior.map(function(d){return d.name;}));
+      yScale.domain([0,d3.max(senior, function(d){return d.pop;})]);
 
       canvas.append("g")
         .attr("class", "x axis")
         .attr("transform", "translate (0," + height + ")")
-        .call (xAxis);
+        .call (xAxis)
+      /*    .selectAll("text")
+        .text("Population of IE undergraduate students at 5 major universities")
+        .style("text-anchor", "end")
+        .attr("dx", "50em")
+        .attr("dy", "-1em")
+        .attr("fill", "darkgrey")
+        .attr("stroke", "black")*/;
 
-      canvas.selectAll("rect")
-        .data(senior)
-        .enter()
-          .append("rect")
-          .attr("width", function(d){ return 5})
-          .attr("height", function(d) {return d.value})
-          .attr("fill", "blue")
+
+        canvas.append("g")
+          .attr("class", "y axis")
+          .call(yAxis)
+          .append("text")
+          .text("Number of Senior IE undergrads")
+          .attr("dx", "-20em")
+          .attr("dy", "-2em")
+          .attr("text-anchor", "start")
+          .attr("font-size", "1.1em")
+          .attr("transform", "rotate(-90)");
+
+      bar = canvas.selectAll("rect")
+          .data(senior)
+          .enter()
+          .append("g");
+
+      bar.append("rect")
+          .attr("x", function(d){ return xScale(d.name)})
+          .attr("y", function (d){ return yScale(d.pop)})
+          .attr("width", xScale.rangeBand())
+          .attr("height", function(d) {return height-yScale(d.pop)})
+          .attr("fill", function(d){ return color(d.name)})
           .attr("stroke", "white");
+
+      bar.append("text")
+        .attr("x", function(d){ return xScale(d.name)})
+        .attr("y", function(d) { return yScale(d.pop) + 3; })
+        .attr("dy", ".75em")
+        .attr("dx", xScale.rangeBand()/2)
+        .text(function(d) { return d.pop; })
+        .attr("fill", "white");
 
 
       /*Axes*/
